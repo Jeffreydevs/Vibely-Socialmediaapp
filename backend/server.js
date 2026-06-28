@@ -9,11 +9,13 @@ const app = express();
 const User = require("./models/User")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const authMiddleware = require("./middleware/authMiddleware");
 
 app.use(express.json()); 
 
-app.get("/",(req,res)=>{ 
-    res.send("Hello user")
+app.get("/profile",authMiddleware, async (req,res)=>{ 
+    const user = await User.findById(req.user.id);
+    res.send(`Hello ${user.username}`);
 });
 
 app.post("/register", async (req,res) => {
