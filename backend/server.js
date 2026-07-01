@@ -94,8 +94,13 @@ app.post("/posts", authMiddleware, async (req,res) => {
     } 
     catch{
       console.log(error)
-      res.send("Something ")
+      res.send("Something went wrong ")
     }
+});
+
+app.get("/posts", authMiddleware, async(req,res) => {
+    const posts = await Post.find.populate("userId","email");
+    res.json(posts);
 });
 
 mongoose.connect(process.env.MONGO_URI) 
