@@ -7,6 +7,7 @@ const express = require("express");
 const mongoose  = require("mongoose")
 const app = express();
 const User = require("./models/User")
+const Post = require("./models/Post")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const authMiddleware = require("./middleware/authMiddleware");
@@ -54,29 +55,48 @@ app.post("/register", async (req,res) => {
 
 app.post("/login", async (req,res) => {
  try{
-   const {email,password} = req.body;
-   if(email === "" || password === ""){
-    return res.send("Please fill all fields")
-   }
+    const {email,password} = req.body;
+    if(email === "" || password === ""){
+        return res.send("Please fill all fields")
+    }
 
-   const user = await User.findOne({email})
-   if(!user){
-    return res.send("User not found")
-   }
+    const user = await User.findOne({email})
+    if(!user){
+        return res.send("User not found")
+    }
 
-   const isPasswordCorrect = await bcrypt.compare(password, user.password)
-   if(!isPasswordCorrect){
-    return res.send("Incorrect password")
-   }
+    const isPasswordCorrect = await bcrypt.compare(password, user.password)
+    if(!isPasswordCorrect){
+        return res.send("Incorrect password")
+    }
 
-   const token = jwt.sign({id: user._id},process.env.JWT_SECRET)
-   res.send(token)
- }
+    const token = jwt.sign({id: user._id},process.env.JWT_SECRET)
+    res.send(token)
+   }
  catch(error){
-   console.log(error)
-   res.send("Something went wrong")
+    console.log(error)
+    res.send("Something went wrong")
  }    
-})
+});
+
+app.post("/posts", authMiddleware, async (req,res) => {
+   try{
+     const {content} = req.body
+     if(content === ""){
+      return res.send("Oops.. Looks like you forgot to add something!")
+     }
+     const post = {
+      content,
+      userId: req.user.id
+     };
+     await Post.create(post)
+     res.send("Post Created Successfully")
+    } 
+    catch{
+      console.log(error)
+      res.send("Something ")
+    }
+});
 
 mongoose.connect(process.env.MONGO_URI) 
 .then(() => { 
