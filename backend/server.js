@@ -103,6 +103,11 @@ app.get("/posts", authMiddleware, async(req,res) => {
     res.json(posts);
 });
 
+app.get("/my-posts", authMiddleware, async(req,res) => {
+    const myPosts = await Post.find({ userId: req.user.id });
+    res.json(myPosts)
+})
+
 mongoose.connect(process.env.MONGO_URI) 
 .then(() => { 
  console.log("MongoDB connected"); 
