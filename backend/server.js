@@ -108,6 +108,23 @@ app.get("/my-posts", authMiddleware, async(req,res) => {
     res.json(myPosts)
 })
 
+app.post("/posts/:id/like", authMiddleware, async(req,res) => {
+    const post = await Post.findById(req.params.id);
+    if (!post){
+        return res.send("Post not found")
+    }
+    const alreadyLiked = post.likes.some(
+     (like) => like.toString() === req.user.id
+    );
+    if(alreadyLiked){
+        post.likes.pull(req.user.id)
+    } else {
+        post.likes.push(req.user.id)
+    }
+    await post.save()
+    res.json(post);
+})
+
 mongoose.connect(process.env.MONGO_URI) 
 .then(() => { 
  console.log("MongoDB connected"); 
