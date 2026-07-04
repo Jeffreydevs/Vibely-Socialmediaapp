@@ -99,7 +99,7 @@ app.post("/posts", authMiddleware, async (req,res) => {
 });
 
 app.get("/posts", authMiddleware, async(req,res) => {
-    const posts = await Post.find.populate("userId","email");
+    const posts = await Post.find().populate("userId","email");
     res.json(posts);
 });
 
@@ -121,6 +121,20 @@ app.post("/posts/:id/like", authMiddleware, async(req,res) => {
     } else {
         post.likes.push(req.user.id)
     }
+    await post.save()
+    res.json(post);
+})
+
+app.post("/posts/:id/comment", authMiddleware, async(req,res) => {
+    const {text} = req.body;
+    const post = await Post.findById(req.params.id);
+    if(!post){
+        return res.send("Post not found")
+    }
+    post.comments.push({ 
+      userId: req.user.id,
+      text
+    })
     await post.save()
     res.json(post);
 })
