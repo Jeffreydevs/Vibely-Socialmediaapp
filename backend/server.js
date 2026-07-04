@@ -137,6 +137,18 @@ app.post("/posts/:id/comment", authMiddleware, async(req,res) => {
     })
     await post.save()
     res.json(post);
+});
+
+app.delete("/posts/:id", authMiddleware, async(req,res) => {
+    const post = await Post.findById(req.params.id);
+    if(!post){
+        return res.send("Post not found")
+    }
+    if (post.userId.toString() !== req.user.id) {
+        return res.status(403).send("Forbidden");
+    }
+    await post.deleteOne();    
+    res.send("Post Deleted")
 })
 
 mongoose.connect(process.env.MONGO_URI) 
