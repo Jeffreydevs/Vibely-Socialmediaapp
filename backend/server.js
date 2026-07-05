@@ -14,155 +14,205 @@ const authMiddleware = require("./middleware/authMiddleware");
 
 app.use(express.json()); 
 
-app.get("/profile",authMiddleware, async (req,res)=>{ 
-    const user = await User.findById(req.user.id);
-    res.send(`Hello ${user.username}`);
+app.get("/profile",authMiddleware, async (req,res)=>{
+   try{
+      const user = await User.findById(req.user.id);
+      res.send(`Hello ${user.username}`);
+    }
+    catch(error){
+      console.log(error)
+      return res.status(500).json({ message: "Something went wrong" });
+    }  
 });
 
 app.post("/register", async (req,res) => {
-  try{
-    const{username, email, password} = req.body;
-    if(username === "" || email === "" || password === ""){
-      return res.send("Please fill all fields")
-    }
+   try{
+      const{username, email, password} = req.body;
+      if (!username || !email || !password) {
+        return res.status(400).json({ message: "Please fill all fields" });
+      }
+      const existingUsername = await User.findOne({username});
+      if(existingUsername){
+        return res.status(409).json({ message: "Username already exists" });
+      }
+      const existingEmail = await User.findOne({email})
+      if(existingEmail){
+        return res.status(409).json({ message: "Email already exists" });
+      }
 
-    const existingUsername = await User.findOne({username});
-    if(existingUsername){
-      return res.send("Username already exists")
-    }
-    const existingEmail = await User.findOne({email})
-    if(existingEmail){
-      return res.send("Email already exists")
-    }
+      const hashedPassword = await bcrypt.hash(password,10)
+      const user = {
+        username,
+        email,
+        password: hashedPassword 
+      }
+      console.log(user)
 
-    const hashedPassword = await bcrypt.hash(password,10)
-    const user = {
-       username,
-       email,
-       password: hashedPassword 
+      await User.create(user)
+      return res.status(201).json({ message: "User registered successfully" });
     }
-    console.log(user)
-
-    await User.create(user)
-    res.send("User registered successfully")
-  }
-  catch(error){
-    console.log(error)
-    res.send("Something went wrong")
-  }   
-
+    catch(error){
+      console.log(error)
+      return res.status(500).json({ message: "Something went wrong" });
+    }   
 });
 
 app.post("/login", async (req,res) => {
- try{
-    const {email,password} = req.body;
-    if(email === "" || password === ""){
-        return res.send("Please fill all fields")
-    }
+   try{
+      const {email,password} = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ message: "Please fill all fields" });
+      }
+      const user = await User.findOne({email})
+      if(!user){
+        return res.status(404).json({ message: "User not found" });
+      }
 
-    const user = await User.findOne({email})
-    if(!user){
-        return res.send("User not found")
-    }
+      const isPasswordCorrect = await bcrypt.compare(password, user.password)
+      if(!isPasswordCorrect){
+        return res.status(401).json({ message: "Incorrect password" });
+      }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password)
-    if(!isPasswordCorrect){
-        return res.send("Incorrect password")
+      const token = jwt.sign({id: user._id},process.env.JWT_SECRET)
+      return res.status(200).json({ token });
     }
-
-    const token = jwt.sign({id: user._id},process.env.JWT_SECRET)
-    res.send(token)
-   }
- catch(error){
-    console.log(error)
-    res.send("Something went wrong")
- }    
+    catch(error){
+      console.log(error)
+      return res.status(500).json({ message: "Something went wrong" });
+    }    
 });
 
 app.post("/posts", authMiddleware, async (req,res) => {
    try{
-     const {content} = req.body
-     if(content === ""){
-      return res.send("Oops.. Looks like you forgot to add something!")
-     }
-     const post = {
-      content,
-      userId: req.user.id
-     };
-     await Post.create(post)
-     res.send("Post Created Successfully")
+      const {content} = req.body
+      if (!content || content.trim() === "") {
+       return res.status(400).json({ message: "Content cannot be empty" });
+      }
+      const post = {
+        content,
+        userId: req.user.id
+      };
+      const createdPost = await Post.create(post);
+      return res.status(201).json({
+        message: "Post created successfully",
+        post: createdPost
+      });
     } 
-    catch{
+    catch(error){
       console.log(error)
-      res.send("Something went wrong ")
+      return res.status(500).json({ message: "Something went wrong" });
     }
 });
 
 app.get("/posts", authMiddleware, async(req,res) => {
-    const posts = await Post.find().populate("userId","email");
-    res.json(posts);
+    try{
+      const posts = await Post.find().populate("userId","email");
+      res.json(posts);
+    }
+    catch(error){
+      console.log(error)
+      return res.status(500).json({ message: "Something went wrong" });
+    }
 });
 
 app.get("/my-posts", authMiddleware, async(req,res) => {
-    const myPosts = await Post.find({ userId: req.user.id });
-    res.json(myPosts)
-})
-
-app.post("/posts/:id/like", authMiddleware, async(req,res) => {
-    const post = await Post.findById(req.params.id);
-    if (!post){
-        return res.send("Post not found")
+    try{
+      const myPosts = await Post.find({ userId: req.user.id });
+      res.json(myPosts)
     }
-    const alreadyLiked = post.likes.some(
-     (like) => like.toString() === req.user.id
-    );
-    if(alreadyLiked){
-        post.likes.pull(req.user.id)
-    } else {
-        post.likes.push(req.user.id)
+    catch(error){
+      console.log(error)
+      return res.status(500).json({ message: "Something went wrong" });
     }
-    await post.save()
-    res.json(post);
-})
-
-app.post("/posts/:id/comment", authMiddleware, async(req,res) => {
-    const {text} = req.body;
-    const post = await Post.findById(req.params.id);
-    if(!post){
-        return res.send("Post not found")
-    }
-    post.comments.push({ 
-      userId: req.user.id,
-      text
-    })
-    await post.save()
-    res.json(post);
 });
 
+app.post("/posts/:id/like", authMiddleware, async(req,res) => {
+    try{
+      const post = await Post.findById(req.params.id);
+      if (!post){
+        return res.status(404).json({ message: "Post not found" });
+      }
+      const alreadyLiked = post.likes.some(
+       (like) => like.toString() === req.user.id
+      );
+      if(alreadyLiked){
+        post.likes.pull(req.user.id)
+      } else {
+        post.likes.push(req.user.id)
+      }
+      await post.save()
+      res.json(post);
+    }
+    catch(error){
+      console.log(error)
+      return res.status(500).json({ message: "Something went wrong" });
+    }
+});
+
+app.post("/posts/:id/comment", authMiddleware, async(req,res) => {
+    try{
+      const {text} = req.body;
+      const post = await Post.findById(req.params.id);
+      if(!post){
+        return res.status(404).json({ message: "Post not found" });
+      }
+      if (!text || text.trim() === "") {
+        return res.status(400).json({ message: "Comment cannot be empty" });
+      }
+      post.comments.push({ 
+        userId: req.user.id,
+        text
+      })
+      await post.save()
+      res.json(post);
+    }
+    catch(error) {
+      console.log(error)
+      return res.status(500).json({ message: "Something went wrong" }); 
+    }
+});
+    
 app.delete("/posts/:id", authMiddleware, async(req,res) => {
-    const post = await Post.findById(req.params.id);
-    if(!post){
-        return res.send("Post not found")
+    try{
+      const post = await Post.findById(req.params.id);
+      if(!post){
+        return res.status(404).json({ message: "Post not found" });
+      }
+      if (post.userId.toString() !== req.user.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      await post.deleteOne();    
+      return res.status(200).json({ message: "Post deleted successfully" });
     }
-    if (post.userId.toString() !== req.user.id) {
-        return res.status(403).send("Forbidden");
+    catch(error){
+      console.log(error);
+      return res.status(500).json({ message: "Something went wrong" });
     }
-    await post.deleteOne();    
-    res.send("Post Deleted")
+
 });
 
 app.put("/posts/:id", authMiddleware, async(req,res) => {
-    const {content} = req.body;
-    const post = await Post.findById(req.params.id)
-    if(!post) {
-        return res.send("Post not found")
+    try{
+      const {content} = req.body;
+      const post = await Post.findById(req.params.id)
+      if(!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      if(post.userId.toString() !== req.user.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      if (!content || content.trim() === "") {
+        return res.status(400).json({ message: "Content cannot be empty" });
+      }
+      post.content = content;
+      await post.save();
+      return res.status(200).json({ message: "Post updated successfully", post });
     }
-    if(post.userId.toString() !== req.user.id) {
-        return res.status(403).send("forbidden");
+    catch(error){
+      console.log(error)
+      return res.status(500).json({ message: "Something went wrong" });
     }
-    post.content = content;
-    await post.save();
-    res.send("Post updated successfully")
+
 });
 
 mongoose.connect(process.env.MONGO_URI) 
