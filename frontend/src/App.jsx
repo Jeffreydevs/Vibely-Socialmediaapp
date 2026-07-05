@@ -8,6 +8,12 @@ import Profile from "./pages/Profile";
 function App() {
   return (
     <BrowserRouter>
+      <nav>
+        <Link to = "/">Home</Link>
+        <Link to = "/login">Login</Link>
+        <Link to = "/register">Register</Link>
+        <Link to = "/profile">Profile</Link>
+      </nav>
       <Routes>
         <Route path = "/" element = {<Home />}/>
         <Route path = "/login" element = {<Login />} />
