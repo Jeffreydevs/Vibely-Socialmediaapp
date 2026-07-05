@@ -149,7 +149,21 @@ app.delete("/posts/:id", authMiddleware, async(req,res) => {
     }
     await post.deleteOne();    
     res.send("Post Deleted")
-})
+});
+
+app.put("/posts/:id", authMiddleware, async(req,res) => {
+    const {content} = req.body;
+    const post = await Post.findById(req.params.id)
+    if(!post) {
+        return res.send("Post not found")
+    }
+    if(post.userId.toString() !== req.user.id) {
+        return res.status(403).send("forbidden");
+    }
+    post.content = content;
+    await post.save();
+    res.send("Post updated successfully")
+});
 
 mongoose.connect(process.env.MONGO_URI) 
 .then(() => { 
