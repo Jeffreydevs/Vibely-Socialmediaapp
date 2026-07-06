@@ -14,10 +14,10 @@ function Register() {
       return
     }
     try{
-      await axios.post(`${API_URL}/register`,{
+      const response = await axios.post(`${API_URL}/register`,{
         username, email, password
       })
-      alert("User registered successfully");
+      alert(response.data.message);
       setUsername("");
       setEmail("");
       setPassword("");
@@ -25,7 +25,6 @@ function Register() {
     catch(error){
       alert(error.response.data.message);
     }
-
   }
 
   return (
