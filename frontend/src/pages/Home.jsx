@@ -9,29 +9,29 @@ function Home() {
   const [content, setContent] = useState("");
 
   async function fetchProfile(){
-     const token = localStorage.getItem("token");
-     try{
-       const response = await axios.get(`${API_URL}/profile`, {
-         headers: { Authorization: `Bearer ${token}`}
-       });
-       setUser(response.data);
-      }
-     catch(error){
-       console.log(error)
-      }
-  };
+    const token = localStorage.getItem("token");
+    try{
+      const response = await axios.get(`${API_URL}/profile`, {
+        headers: { Authorization: `Bearer ${token}`}
+      });
+      setUser(response.data);
+    }
+    catch(error){
+      console.log(error)
+    }
+  }
 
   async function fetchPosts(){
-     const token = localStorage.getItem("token");
-     try{
-       const response = await axios.get(`${API_URL}/posts`,{
-         headers: { Authorization: `Bearer ${token}`}
-       });
-       setPosts(response.data);
-     }
-     catch(error){
-       console.log(error)
-     }
+    const token = localStorage.getItem("token");
+    try{
+      const response = await axios.get(`${API_URL}/posts`,{
+        headers: { Authorization: `Bearer ${token}`}
+      });
+      setPosts(response.data);
+    }
+    catch(error){
+      console.log(error)
+    }
   };
 
   useEffect(() => {
@@ -40,20 +40,32 @@ function Home() {
   },[]);
 
   async function handleCreatePost() {
-     if(!content.trim()){
-       alert("Please write something")
-       return
-     }
-     const token = localStorage.getItem("token");
-     try{
-       const response = await axios.post(`${API_URL}/posts`,{content},
-         {headers: {Authorization: `Bearer ${token}`}})
-       setContent("")
-       fetchPosts()  
-     }
-     catch(error){
-       console.log(error)
-     }
+    if(!content.trim()){
+      alert("Please write something")
+      return
+    }
+    const token = localStorage.getItem("token");
+    try{
+      const response = await axios.post(`${API_URL}/posts`,{content},
+        {headers: {Authorization: `Bearer ${token}`}})
+      setContent("")
+      fetchPosts()  
+    }
+    catch(error){
+      console.log(error)
+    }
+  };
+
+  async function handleLike(postId) {
+    const token = localStorage.getItem("token");
+    try{
+      const response = await axios.post(`${API_URL}/posts/${postId}/like`,{},
+        {headers: {Authorization: `Bearer ${token}`}})
+      fetchPosts()
+    }
+    catch(error){
+      console.log(error)
+    }
   };
 
   return (
@@ -67,6 +79,9 @@ function Home() {
          <div key={post._id}>
            <h3>{post.userId.username}</h3>
            <p>{post.content}</p>
+           <button onClick={() => handleLike(post._id)}>
+             Like {post.likes.length}
+           </button>
          </div> 
        ))}
      </>
