@@ -238,6 +238,7 @@ input {
   color: #1f2937;
   font-size: 1.06rem;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .edit-box {
@@ -346,6 +347,7 @@ input {
 
 .comment p {
   margin-bottom: 0;
+  overflow-wrap: anywhere;
 }
 
 .empty-state {
@@ -487,6 +489,10 @@ input {
 }
 
 @media (max-width: 640px) {
+  .app-main {
+    padding: 22px 12px 40px;
+  }
+
   .topbar,
   .feed-header,
   .nav-links {
@@ -498,17 +504,79 @@ input {
     flex-direction: column;
   }
 
+  .topbar {
+    gap: 14px;
+    padding: 14px 12px;
+  }
+
+  .brand {
+    justify-content: center;
+  }
+
   .nav-links {
     width: 100%;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: 8px;
+  }
+
+  .nav-links a,
+  .ghost-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .feed-header h1,
+  .auth-panel h1,
+  .profile-content h1 {
+    font-size: 2rem;
+  }
+
+  .composer,
+  .post-card,
+  .auth-panel {
+    padding: 14px;
   }
 
   .composer {
     grid-template-columns: 1fr;
   }
 
+  .avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .composer-actions,
+  .post-actions,
+  .edit-actions {
+    align-items: stretch;
+  }
+
+  .post-actions button,
+  .edit-actions button,
+  .primary-button {
+    flex: 1 1 120px;
+  }
+
   .comment-box {
     grid-template-columns: 1fr;
+  }
+
+  .comment {
+    grid-template-columns: 1fr;
+  }
+
+  .comment-avatar {
+    display: none;
+  }
+
+  .profile-card {
+    width: 100%;
+  }
+
+  .profile-content {
+    padding: 0 18px 24px;
   }
 
   .profile-stats {
