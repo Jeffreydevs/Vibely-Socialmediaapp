@@ -7,6 +7,7 @@ function Home() {
   const [user,setUser] = useState(null);
   const [posts,setPosts] = useState([]);
   const [content, setContent] = useState("");
+  const [commentText,setCommentText] = useState({});
 
   async function fetchProfile(){
     const token = localStorage.getItem("token");
@@ -83,11 +84,9 @@ function Home() {
 
   async function handleEditPost(post){
     const newContent = prompt("Edit your post", post.content);
-
     if(!newContent || !newContent.trim()){
       return
     }
-
     const token = localStorage.getItem("token");
     try{
       await axios.put(`${API_URL}/posts/${post._id}`, {content: newContent}, {
@@ -98,35 +97,73 @@ function Home() {
     catch(error){
       console.log(error)
     }
-  }
+  };
+
+  async function handleCommentPost(postId) {
+    const text = commentText[postId];
+
+    if(!text || !text.trim()){
+      alert("Please write a comment")
+      return
+    }
+
+    const token = localStorage.getItem("token");
+    try{
+      await axios.post(`${API_URL}/posts/${postId}/comment`, {text}, {
+        headers: {Authorization: `Bearer ${token}`}
+      });
+      setCommentText({...commentText, [postId]: ""})
+      fetchPosts()
+    }
+    catch(error){
+      console.log(error)
+    }
+  };
 
   return (
-     <>
-       {user && <h1>Welcome {user.username}</h1>}
-       <textarea placeholder="What's on your mind?" value={content} onChange={(event) => setContent(event.target.value)}>
+    <>
+      {user && <h1>Welcome {user.username}</h1>}
+      <textarea placeholder="What's on your mind?" value={content} onChange={(event) => setContent(event.target.value)}>
 
-       </textarea>
-       <button onClick={handleCreatePost}>Post</button>
-       {posts.map((post) => (
-         <div key={post._id}>
-           <h3>{post.userId.username}</h3>
-           <p>{post.content}</p>
-           <button onClick={() => handleLike(post._id)}>
-             Like {post.likes.length}
-           </button>
-           {user && post.userId._id === user._id && (
-             <button onClick={() => handleDeletePost(post._id)}>
-               Delete
-             </button>
-           )}
-           {user&&post.userId._id === user._id && (
-             <button onClick={()=>handleEditPost(post)}>
-               Edit
-             </button>
-           )}
-         </div> 
-       ))}
-     </>
+      </textarea>
+      <button onClick={handleCreatePost}>Post</button>
+      {posts.map((post) => (
+        <div key={post._id}>
+          <h3>{post.userId.username}</h3>
+          <p>{post.content}</p>
+          <button onClick={() => handleLike(post._id)}>
+            Like {post.likes.length}
+          </button>
+          {user && post.userId._id === user._id && (
+            <button onClick={() => handleDeletePost(post._id)}>
+              Delete
+            </button>
+          )}
+          {user&&post.userId._id === user._id && (
+            <button onClick={()=>handleEditPost(post)}>
+              Edit
+            </button>
+          )}
+          <div>
+            <input
+              type="text"
+              placeholder="Write a comment"
+              value={commentText[post._id] || ""}
+              onChange={(event) => setCommentText({
+                ...commentText,
+                [post._id]: event.target.value
+              })}
+            />
+            <button onClick={() => handleCommentPost(post._id)}>
+              Comment
+            </button>
+          </div>
+          {post.comments.map((comment) => (
+            <p key={comment._id}>{comment.text}</p>
+          ))}
+        </div> 
+      ))}
+    </>
   );
 }
 
