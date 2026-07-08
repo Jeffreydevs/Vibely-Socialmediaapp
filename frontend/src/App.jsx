@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import{ useNavigate, Routes, Route, Link } from "react-router-dom"
+import "./App.css";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -16,28 +17,38 @@ function App() {
     navigate("/login");
   }
   return (
-    <>
-    <nav>
-      {isLoggedIn ? (
-        <>
-          <Link to = "/">Home</Link>
-          <Link to = "/profile">Profile</Link>
-          <button onClick={handleLogout}>Logout</button>
-        </>
-      ) : (
-        <>
-          <Link to = "/login">Login</Link>
-          <Link to = "/register">Register</Link>
-        </>
-      )}
-    </nav>
-    <Routes>
-      <Route path = "/" element = {<Home />}/>
-      <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn}/>}/>
-      <Route path = "/register" element = {<Register />}/>
-      <Route path = "/profile" element = {<Profile />}/>
-    </Routes>
-    </>
+    <div className="app-shell">
+      <nav className="topbar">
+        <Link to="/" className="brand">
+          <span className="brand-mark">V</span>
+          <span>Vibely</span>
+        </Link>
+
+        <div className="nav-links">
+          {isLoggedIn ? (
+            <>
+              <Link to = "/">Home</Link>
+              <Link to = "/profile">Profile</Link>
+              <button className="ghost-button" onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <Link to = "/login">Login</Link>
+              <Link to = "/register" className="primary-link">Register</Link>
+            </>
+          )}
+        </div>
+      </nav>
+
+      <main className="app-main">
+        <Routes>
+          <Route path = "/" element = {<Home />}/>
+          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn}/>}/>
+          <Route path = "/register" element = {<Register />}/>
+          <Route path = "/profile" element = {<Profile />}/>
+        </Routes>
+      </main>
+    </div>
   );
 }
 export default App;

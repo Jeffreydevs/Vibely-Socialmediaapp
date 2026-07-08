@@ -109,7 +109,9 @@ app.post("/posts", authMiddleware, async (req,res) => {
 
 app.get("/posts", authMiddleware, async(req,res) => {
   try{
-      const posts = await Post.find().populate("userId","username email");
+    const posts = await Post.find()
+      .populate("userId","username email")
+      .populate("comments.userId","username email");
     res.json(posts);
   }
   catch(error){
@@ -167,7 +169,10 @@ app.post("/posts/:id/comment", authMiddleware, async(req,res) => {
       text
     })
     await post.save()
-    res.json(post);
+    const updatedPost = await Post.findById(req.params.id)
+      .populate("userId","username email")
+      .populate("comments.userId","username email");
+    res.json(updatedPost);
   }
   catch(error) {
     console.log(error)
