@@ -123,7 +123,7 @@ app.get("/posts", authMiddleware, async(req,res) => {
 
 app.get("/my-posts", authMiddleware, async(req,res) => {
   try{
-    const myPosts = await Post.find({ userId: req.user.id });
+    const myPosts = await Post.find({ userId: req.user.id }).sort({ createdAt: -1 });
     res.json(myPosts)
   }
   catch(error){

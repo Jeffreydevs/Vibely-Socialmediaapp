@@ -4,6 +4,30 @@ import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:3000";
 
+function formatTimeAgo(dateString){
+  if(!dateString){
+    return "Just now";
+  }
+
+  const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
+
+  if(seconds < 60){
+    return "Just now";
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  if(minutes < 60){
+    return `${minutes} min ago`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  if(hours < 24){
+    return `${hours} hr ago`;
+  }
+
+  return new Date(dateString).toLocaleDateString();
+}
+
 function Home() {
   const [user,setUser] = useState(null);
   const [posts,setPosts] = useState([]);
@@ -106,6 +130,11 @@ function Home() {
   };
 
   async function handleDeletePost(postId){
+    const shouldDelete = confirm("Delete this post?");
+    if(!shouldDelete){
+      return
+    }
+
     const token = localStorage.getItem("token");
     try{
       await axios.delete(`${API_URL}/posts/${postId}`, {
@@ -207,6 +236,10 @@ function Home() {
             {posts.map((post) => {
               const ownerName = post.userId?.username || "Vibely user";
               const isOwner = user && post.userId?._id === user._id;
+              const isLiked = user && (post.likes || []).some((like) => {
+                const likeId = typeof like === "string" ? like : like?._id;
+                return likeId === user._id;
+              });
 
               return (
                 <article className="post-card card" key={post._id}>
@@ -214,7 +247,7 @@ function Home() {
                     <div className="avatar">{ownerName.charAt(0).toUpperCase()}</div>
                     <div>
                       <h3>{ownerName}</h3>
-                      <p>Shared a new vibe</p>
+                      <p>Shared a new vibe · {formatTimeAgo(post.createdAt)}</p>
                     </div>
                   </div>
 
@@ -238,8 +271,11 @@ function Home() {
                   )}
 
                   <div className="post-actions">
-                    <button onClick={() => handleLike(post._id)}>
-                      Like {post.likes?.length || 0}
+                    <button
+                      className={isLiked ? "liked-button" : ""}
+                      onClick={() => handleLike(post._id)}
+                    >
+                      {isLiked ? "Liked" : "Like"} {post.likes?.length || 0}
                     </button>
                     {isOwner && (
                       <>
@@ -283,7 +319,10 @@ function Home() {
                               {commenterName.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <strong>{commenterName}</strong>
+                              <strong>
+                                {commenterName}
+                                <span>{formatTimeAgo(comment.createdAt)}</span>
+                              </strong>
                               <p>{comment.text}</p>
                             </div>
                           </div>

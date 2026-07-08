@@ -287,6 +287,11 @@ input {
   background: #1f9d8a;
 }
 
+.post-actions .liked-button {
+  color: #ffffff;
+  background: #ff5a5f;
+}
+
 .comment-box {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -325,10 +330,18 @@ input {
 }
 
 .comment strong {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 2px;
   color: #1f2937;
   font-size: 0.9rem;
+}
+
+.comment strong span {
+  color: #9a8a7d;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .comment p {
@@ -413,6 +426,66 @@ input {
   font-size: 1.6rem;
 }
 
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.profile-stats div {
+  padding: 14px;
+  background: #fff8ec;
+  border: 1px solid #f0dfcf;
+  border-radius: 8px;
+}
+
+.profile-stats strong,
+.profile-stats span {
+  display: block;
+}
+
+.profile-stats strong {
+  color: #111827;
+  font-size: 1.35rem;
+}
+
+.profile-stats span {
+  color: #7a6b60;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.profile-posts {
+  display: grid;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.profile-posts h2 {
+  margin-bottom: 2px;
+  font-size: 1.15rem;
+}
+
+.profile-post {
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #f0dfcf;
+  border-radius: 8px;
+}
+
+.profile-post p {
+  margin-bottom: 8px;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+.profile-post span {
+  color: #7a6b60;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 @media (max-width: 640px) {
   .topbar,
   .feed-header,
@@ -435,6 +508,10 @@ input {
   }
 
   .comment-box {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-stats {
     grid-template-columns: 1fr;
   }
 }
