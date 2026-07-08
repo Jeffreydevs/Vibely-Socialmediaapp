@@ -8,22 +8,32 @@ import Profile from "./pages/Profile";
 
 function App() {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState( !!localStorage.getItem("token") );
+
   function handleLogout() {
     localStorage.removeItem("token")
+    setIsLoggedIn(false);
     navigate("/login");
   }
   return (
     <>
     <nav>
-      <Link to = "/">Home</Link>
-      <Link to = "/login">Login</Link>
-      <Link to = "/register">Register</Link>
-      <Link to = "/profile">Profile</Link>
-      <button onClick={handleLogout}>Logout</button>
+      {isLoggedIn ? (
+        <>
+          <Link to = "/">Home</Link>
+          <Link to = "/profile">Profile</Link>
+          <button onClick={handleLogout}>Logout</button>
+        </>
+      ) : (
+        <>
+          <Link to = "/login">Login</Link>
+          <Link to = "/register">Register</Link>
+        </>
+      )}
     </nav>
     <Routes>
       <Route path = "/" element = {<Home />}/>
-      <Route path = "/login" element = {<Login />} />
+      <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn}/>}/>
       <Route path = "/register" element = {<Register />}/>
       <Route path = "/profile" element = {<Profile />}/>
     </Routes>
