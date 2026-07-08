@@ -81,6 +81,25 @@ function Home() {
     }
   };
 
+  async function handleEditPost(post){
+    const newContent = prompt("Edit your post", post.content);
+
+    if(!newContent || !newContent.trim()){
+      return
+    }
+
+    const token = localStorage.getItem("token");
+    try{
+      await axios.put(`${API_URL}/posts/${post._id}`, {content: newContent}, {
+        headers: {Authorization: `Bearer ${token}`}
+      });
+      fetchPosts()
+    }
+    catch(error){
+      console.log(error)
+    }
+  }
+
   return (
      <>
        {user && <h1>Welcome {user.username}</h1>}
@@ -98,6 +117,11 @@ function Home() {
            {user && post.userId._id === user._id && (
              <button onClick={() => handleDeletePost(post._id)}>
                Delete
+             </button>
+           )}
+           {user&&post.userId._id === user._id && (
+             <button onClick={()=>handleEditPost(post)}>
+               Edit
              </button>
            )}
          </div> 
