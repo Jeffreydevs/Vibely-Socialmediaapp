@@ -68,6 +68,19 @@ function Home() {
     }
   };
 
+  async function handleDeletePost(postId){
+    const token = localStorage.getItem("token");
+    try{
+      await axios.delete(`${API_URL}/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${token}`}
+      });
+      fetchPosts()
+    }
+    catch(error){
+      console.log(error)
+    }
+  };
+
   return (
      <>
        {user && <h1>Welcome {user.username}</h1>}
@@ -82,6 +95,11 @@ function Home() {
            <button onClick={() => handleLike(post._id)}>
              Like {post.likes.length}
            </button>
+           {user && post.userId._id === user._id && (
+             <button onClick={() => handleDeletePost(post._id)}>
+               Delete
+             </button>
+           )}
          </div> 
        ))}
      </>
