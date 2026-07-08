@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:3000";
 
@@ -8,6 +9,7 @@ function Home() {
   const [posts,setPosts] = useState([]);
   const [content, setContent] = useState("");
   const [commentText,setCommentText] = useState({});
+  const navigate = useNavigate()
 
   async function fetchProfile(){
     const token = localStorage.getItem("token");
@@ -36,6 +38,11 @@ function Home() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+     navigate("/login");
+     return;
+   }
     fetchProfile();
     fetchPosts();
   },[]);
@@ -101,12 +108,10 @@ function Home() {
 
   async function handleCommentPost(postId) {
     const text = commentText[postId];
-
     if(!text || !text.trim()){
       alert("Please write a comment")
       return
     }
-
     const token = localStorage.getItem("token");
     try{
       await axios.post(`${API_URL}/posts/${postId}/comment`, {text}, {
@@ -127,7 +132,8 @@ function Home() {
 
       </textarea>
       <button onClick={handleCreatePost}>Post</button>
-      {posts.map((post) => (
+      {Array.isArray(posts) &&
+       posts.map((post) => (
         <div key={post._id}>
           <h3>{post.userId.username}</h3>
           <p>{post.content}</p>
