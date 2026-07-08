@@ -16,7 +16,10 @@ const jwt = require("jsonwebtoken")
 const authMiddleware = require("./middleware/authMiddleware");
 
 
-app.use(express.json()); 
+app.use(express.json());
+app.get("/", (req, res) => {
+  res.send("Vibely backend is running");
+}); 
 
 app.get("/profile",authMiddleware, async (req,res)=>{
   try{
