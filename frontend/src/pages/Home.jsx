@@ -11,6 +11,8 @@ function Home() {
   const [commentText,setCommentText] = useState({});
   const [feedLoading,setFeedLoading] = useState(true);
   const [feedError,setFeedError] = useState("");
+  const [editingPostId,setEditingPostId] = useState(null);
+  const [editContent,setEditContent] = useState("");
   const navigate = useNavigate()
 
   async function fetchProfile(){
@@ -116,16 +118,28 @@ function Home() {
     }
   };
 
-  async function handleEditPost(post){
-    const newContent = prompt("Edit your post", post.content);
-    if(!newContent || !newContent.trim()){
+  function handleStartEdit(post){
+    setEditingPostId(post._id);
+    setEditContent(post.content);
+  };
+
+  function handleCancelEdit(){
+    setEditingPostId(null);
+    setEditContent("");
+  };
+
+  async function handleSaveEdit(postId){
+    if(!editContent || !editContent.trim()){
+      alert("Please write something")
       return
     }
+
     const token = localStorage.getItem("token");
     try{
-      await axios.put(`${API_URL}/posts/${post._id}`, {content: newContent}, {
+      await axios.put(`${API_URL}/posts/${postId}`, {content: editContent}, {
         headers: {Authorization: `Bearer ${token}`}
       });
+      handleCancelEdit()
       fetchPosts()
     }
     catch(error){
@@ -204,7 +218,24 @@ function Home() {
                     </div>
                   </div>
 
-                  <p className="post-content">{post.content}</p>
+                  {editingPostId === post._id ? (
+                    <div className="edit-box">
+                      <textarea
+                        value={editContent}
+                        onChange={(event) => setEditContent(event.target.value)}
+                      />
+                      <div className="edit-actions">
+                        <button onClick={() => handleSaveEdit(post._id)}>
+                          Save
+                        </button>
+                        <button onClick={handleCancelEdit}>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="post-content">{post.content}</p>
+                  )}
 
                   <div className="post-actions">
                     <button onClick={() => handleLike(post._id)}>
@@ -212,7 +243,7 @@ function Home() {
                     </button>
                     {isOwner && (
                       <>
-                        <button onClick={()=>handleEditPost(post)}>
+                        <button onClick={()=>handleStartEdit(post)}>
                           Edit
                         </button>
                         <button onClick={() => handleDeletePost(post._id)}>

@@ -240,6 +240,36 @@ input {
   line-height: 1.6;
 }
 
+.edit-box {
+  display: grid;
+  gap: 10px;
+}
+
+.edit-box textarea {
+  min-height: 96px;
+}
+
+.edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.edit-actions button {
+  min-height: 38px;
+  padding: 0 14px;
+  color: #ffffff;
+  background: #1f9d8a;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.edit-actions button:last-child {
+  color: #4b4038;
+  background: #fff0df;
+}
+
 .post-actions {
   display: flex;
   flex-wrap: wrap;
