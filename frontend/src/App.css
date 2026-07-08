@@ -310,6 +310,19 @@ input {
   text-align: center;
 }
 
+.notice-card {
+  padding: 18px;
+  color: #61574f;
+  font-weight: 700;
+  text-align: center;
+}
+
+.error-card {
+  color: #9f1239;
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
 .empty-state h2 {
   margin-bottom: 8px;
 }

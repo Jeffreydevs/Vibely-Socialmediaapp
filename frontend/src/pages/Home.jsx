@@ -9,6 +9,8 @@ function Home() {
   const [posts,setPosts] = useState([]);
   const [content, setContent] = useState("");
   const [commentText,setCommentText] = useState({});
+  const [feedLoading,setFeedLoading] = useState(true);
+  const [feedError,setFeedError] = useState("");
   const navigate = useNavigate()
 
   async function fetchProfile(){
@@ -21,6 +23,11 @@ function Home() {
     }
     catch(error){
       console.log(error)
+      if(error.response?.status === 401){
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+      throw error
     }
   }
 
@@ -34,17 +41,37 @@ function Home() {
     }
     catch(error){
       console.log(error)
+      if(error.response?.status === 401){
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+      throw error
     }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-     navigate("/login");
-     return;
-   }
-    fetchProfile();
-    fetchPosts();
+    async function loadFeed(){
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      setFeedLoading(true);
+      setFeedError("");
+
+      try{
+        await Promise.all([fetchProfile(), fetchPosts()]);
+      }
+      catch(error){
+        setFeedError("Could not load your Vibely feed. Please refresh or log in again.");
+      }
+      finally{
+        setFeedLoading(false);
+      }
+    }
+
+    loadFeed();
   },[]);
 
   async function handleCreatePost() {
@@ -150,7 +177,17 @@ function Home() {
         </div>
       </div>
 
-      {Array.isArray(posts) &&
+      {feedError && (
+        <div className="notice-card error-card card">
+          {feedError}
+        </div>
+      )}
+
+      {feedLoading ? (
+        <div className="notice-card card">
+          Loading your Vibely feed...
+        </div>
+      ) : Array.isArray(posts) &&
         posts.length > 0 ? (
           <div className="post-list">
             {posts.map((post) => {
@@ -232,8 +269,7 @@ function Home() {
             <h2>No posts yet</h2>
             <p>Start the conversation by sharing the first vibe.</p>
           </div>
-        )
-      }
+        )}
     </section>
   );
 }
