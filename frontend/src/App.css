@@ -25,13 +25,9 @@
   font-weight: 800;
 }
 
-.brand-mark {
-  display: grid;
+.brand-logo {
   width: 36px;
   height: 36px;
-  place-items: center;
-  color: #ffffff;
-  background: #ff5a5f;
   border-radius: 8px;
   box-shadow: 0 10px 24px rgba(255, 90, 95, 0.24);
 }

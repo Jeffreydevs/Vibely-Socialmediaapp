@@ -20,7 +20,7 @@ function App() {
     <div className="app-shell">
       <nav className="topbar">
         <Link to="/" className="brand">
-          <span className="brand-mark">V</span>
+          <img className="brand-logo" src="/vibely-logo.svg" alt="Vibely" />
           <span>Vibely</span>
         </Link>
 
