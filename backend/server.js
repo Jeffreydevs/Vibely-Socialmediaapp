@@ -110,6 +110,7 @@ app.post("/posts", authMiddleware, async (req,res) => {
 app.get("/posts", authMiddleware, async(req,res) => {
   try{
     const posts = await Post.find()
+      .sort({ createdAt: -1 })
       .populate("userId","username email")
       .populate("comments.userId","username email");
     res.json(posts);
